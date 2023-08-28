@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Benchmarking</title>
+    <style>
+      .rehashing {
+        background-color: aqua;
+      }
+    </style>
+  </head>
+  <body onload="hashChanged()">
+    <center>
+      <h2>Instructions for ESP12</h2>
+      <p>
+        <em>
+          Please ensure that the board has access to internet since during
+          saving, the filename is composed by fetching the current time from the
+          internet and the program will crash if it finds it difficult to fetch
+          the time.
+        </em>
+      </p>
+      <hr />
+    </center>
+    <div class="rehashing">
+      <br />
+      <center>
+        <form action="/rehash" method="get" onsubmit="return hashChanged">
+          <table onchange="hashChanged()">
+            <tr>
+              <td>
+                <label for="benchmark">Task</label>
+              </td>
+              <td>
+                <select name="benchmark" id="benchmark">
+                  <option value="none">Select an Option</option>
+                  <option value="bare_hashing">Bare Hashing</option>
+                  <option value="hashing_with_nonce">Hashing With Nonce</option>
+                  <option value="hash_verification">Hash Verification</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label for="data_sizes">Data Size</label>
+              </td>
+              <td>
+                <select name="dataSizes" id="data_sizes">
+                  <option value="500b">500 Bytes</option>
+                  <option value="1k">1 KBytes</option>
+                  <option value="5k">5 KBytes</option>
+                  <option value="10k">10 KBytes</option>
+                  <option value="100k">100 KBytes</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label for="starting_nonce">Starting Nonce</label>
+              </td>
+              <td>
+                <input type="number" id="starting_nonce" name="startingNonce" />
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label for="difficulty">Difficulty</label>
+              </td>
+              <td>
+                <input type="number" id="difficulty" name="difficulty" />
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label for="results_count">Results Count</label>
+              </td>
+              <td>
+                <input type="number" id="results_count" name="resultsCount" />
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label for="nloop">Iterations</label>
+              </td>
+              <td>
+                <input type="number" id="nloop" name="nLoop" />
+              </td>
+            </tr>
+            <tr>
+              <td><label for="data_format">Data Format</label></td>
+              <td>
+                <select name="dataFormat" id="data_format">
+                  <option value="csv">CSV</option>
+                  <option value="json">JSON</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="2">
+                <center>
+                  <input
+                    type="submit"
+                    value="Hash and Download"
+                    id="btnSubmit"
+                    hidden="true"
+                  />
+                </center>
+              </td>
+            </tr>
+          </table>
+        </form>
+      </center>
+    </div>
+  </body>
+  <script>
+    function hashChanged() {
+      var selectorObject = document.getElementById("benchmark");
+      var selectorValue = selectorObject.value;
+      if (selectorValue == "none") {
+        //   document.getElementById("btnSubmit").hidden = true; // including this
+        hideOtherElements(true);
+      } else {
+        hideOtherElements(false);
+        if (verifyInputs()) {
+          document.getElementById("btnSubmit").hidden = false;
+        } else {
+          document.getElementById("btnSubmit").hidden = true;
+        }
+      }
+    }
+    function hideOtherElements(hide) {
+      document.getElementById("data_sizes").disabled = hide;
+      document.getElementById("starting_nonce").disabled = hide;
+      document.getElementById("difficulty").disabled = hide;
+      document.getElementById("results_count").disabled = hide;
+      document.getElementById("nloop").disabled = hide;
+      document.getElementById("data_format").disabled = hide;
+      if (hide) {
+        resetValues();
+      }
+    }
+    function resetValues() {
+      document.getElementById("starting_nonce").value = "";
+      document.getElementById("difficulty").value = "";
+      document.getElementById("results_count").value = "";
+      document.getElementById("nloop").value = "";
+    }
+    function verifyInputs() {
+      var hashToBeDone = document.getElementById("benchmark").value;
+      var dataSize = document.getElementById("data_sizes");
+      var nonce = document.getElementById("starting_nonce");
+      var difficulty = document.getElementById("difficulty");
+      var results = document.getElementById("results_count");
+      var iterations = document.getElementById("nloop");
+
+      if (hashToBeDone == "hashing_with_nonce") {
+        if (nonce.value == "" || nonce.value < 0) {
+          nonce.value = "";
+          nonce.focus();
+          return false;
+        }
+        if (difficulty.value == "" || difficulty.value <= 0) {
+          difficulty.value == "";
+          difficulty.focus();
+          return false;
+        }
+        nonce.disabled = false;
+        difficulty.disabled = false;
+      } else if (hashToBeDone == "bare_hashing") {
+        nonce.disabled = true;
+        difficulty.disabled = true;
+      } else {
+        // TODO: Change later
+        nonce.disabled = false;
+        difficulty.disabled = false;
+      }
+      if (results.value == "" || results.value <= 0) {
+        results.focus();
+        return false;
+      }
+      if (iterations.value == "" || results.value <= 0) {
+        iterations.focus();
+        return false;
+      }
+      return true;
+    }
+  </script>
+</html>
